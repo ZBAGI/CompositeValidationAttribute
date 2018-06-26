@@ -1,36 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace CompositeValidationAttributeExample
 {
-    public abstract class CompositeValidationAttribute : ValidationAttribute
+    public abstract class CompositeValidationAttribute : Attribute, IModelValidator
     {
         protected List<ValidationAttribute> ValidationAttributes { get; } = new List<ValidationAttribute>();
 
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        public IEnumerable<ModelValidationResult> Validate(ModelValidationContext context)
         {
-            var errorMessageBuilder = new StringBuilder();
+            var validationResult = new List<ModelValidationResult>();
+
+            var validationContext = new ValidationContext(context.Model);
 
             foreach (var attribute in ValidationAttributes)
             {
-                var result = attribute.GetValidationResult(value, validationContext);
-
+                var result = attribute.GetValidationResult(context.Model, validationContext);
                 if (result != null && !string.IsNullOrWhiteSpace(result.ErrorMessage))
                 {
-                    errorMessageBuilder.Append($"{result.ErrorMessage} ");
+                    validationResult.Add(new ModelValidationResult(validationContext.MemberName, result.ErrorMessage));
                 }
             }
 
-            if (errorMessageBuilder.Length == 0)
-            {
-                return ValidationResult.Success;
-            }
-            var errorMessage = errorMessageBuilder.ToString().TrimEnd();
-
-            return new ValidationResult(
-                errorMessage: errorMessage, 
-                memberNames: new List<string> { validationContext.MemberName });
+            return validationResult;
         }
     }
 }
