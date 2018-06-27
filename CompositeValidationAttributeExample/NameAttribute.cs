@@ -6,7 +6,8 @@ namespace CompositeValidationAttributeExample
     {
         public NameAttribute()
         {
-            ValidationAttributes.Add(new StringLengthAttribute(5));
+            ValidationAttributes.Add(new MinLengthAttribute(5));
+            ValidationAttributes.Add(new RequiredAttribute());
             ValidationAttributes.Add(new RegularExpressionAttribute(@"^[A-Z]+[a-zA-Z""'\s-]*$"));
         }
     }
