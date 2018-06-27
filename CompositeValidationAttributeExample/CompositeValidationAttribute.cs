@@ -14,7 +14,7 @@ namespace CompositeValidationAttributeExample
         {
             var validationResult = new List<ModelValidationResult>();
 
-            var validationContext = new ValidationContext(context.Model);
+            var validationContext = new ValidationContext(context.Model ?? new object());
 
             foreach (var attribute in ValidationAttributes)
             {
